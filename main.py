@@ -59,8 +59,13 @@ def get_dogs(kind: Optional[DogType] = Query(None)):
 
 @app.post('/dog', response_model=Dog)
 def create_dog(dog: Dog):
+
+    # client error (attempt to create a dog with pk that already exists)
+    # -> client made a bad request
     if dog.pk in dogs_db:
-        raise HTTPException(status_code=400, detail="Dog with this PK already exists")
+        raise HTTPException(status_code=400,
+                            detail="Dog with this PK already exists")
+
     dogs_db[dog.pk] = dog
     return dog
 
@@ -68,16 +73,24 @@ def create_dog(dog: Dog):
 @app.get('/dog/{pk}', response_model=Dog)
 def get_dog_by_pk(pk: int):
     dog = dogs_db.get(pk)
+
+    # not found (access a dog that is not in the database) -> 404
     if dog is None:
-        raise HTTPException(status_code=404, detail="Dog not found")
+        raise HTTPException(status_code=404,
+                            detail="Dog not found")
+
     return dog
 
 
 @app.patch('/dog/{pk}', response_model=Dog)
 def update_dog(pk: int, dog_update: Dog = Body(...)):
     existing_dog = dogs_db.get(pk)
+
+    # not found (access a dog that is not in the database) -> 404
     if existing_dog is None:
-        raise HTTPException(status_code=404, detail="Dog not found")
+        raise HTTPException(status_code=404,
+                            detail="Dog not found")
+
     dog_update.pk = pk  # Ensure the pk doesn't change
     dogs_db[pk] = dog_update
     return dog_update
