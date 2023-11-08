@@ -38,6 +38,9 @@ post_db = [
     Timestamp(id=1, timestamp=10)
 ]
 
+# если не тот kind - летят 422
+# также добавил некоторые ошибки на свое усмотрение
+
 
 @app.get('/')
 def root() -> Dict[str, str]:
@@ -61,7 +64,7 @@ def get_dogs(kind: Optional[DogType] = Query(None)):
 def create_dog(dog: Dog):
 
     # client error (attempt to create a dog with pk that already exists)
-    # -> client made a bad request
+    # -> client made a bad request -> 400
     if dog.pk in dogs_db:
         raise HTTPException(status_code=400,
                             detail="Dog with this PK already exists")
